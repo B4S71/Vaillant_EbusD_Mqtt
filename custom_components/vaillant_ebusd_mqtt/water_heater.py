@@ -12,9 +12,8 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.event import async_track_state_change_event
 
-from .const import CONF_ENTITY_PREFIX, CONF_MQTT_PREFIX, DAYS, DOMAIN, SLOT_SUFFIXES
+from .const import CONF_ENTITY_PREFIX, CONF_MQTT_PREFIX, DEFAULT_ENTITY_PREFIX, DAYS, DOMAIN, SLOT_SUFFIXES
 
 _EMPTY = "-:-"
 
@@ -46,8 +45,6 @@ async def async_setup_entry(
 
 
 class VaillantHotWater(WaterHeaterEntity):
-    """Water heater entity backed by existing ebusd_vaillant select/sensor entities."""
-
     _attr_should_poll = False
     _attr_name = "Vaillant Warmwasser"
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
@@ -60,15 +57,14 @@ class VaillantHotWater(WaterHeaterEntity):
     _attr_max_temp = 70.0
 
     def __init__(self, config_entry: ConfigEntry) -> None:
-        ep = config_entry.data[CONF_ENTITY_PREFIX]
         self._mp = config_entry.data[CONF_MQTT_PREFIX]
+        self._ep = config_entry.data.get(CONF_ENTITY_PREFIX, DEFAULT_ENTITY_PREFIX)
         self._config_entry = config_entry
         self._attr_unique_id = f"{config_entry.entry_id}_hot_water"
 
-        self._mode_id = f"select.{ep}_ebusd_700_hwcopmode"
-        self._temp_id = f"sensor.{ep}_ebusd_700_hwcstoragetemp"
-        self._target_id = f"sensor.{ep}_ebusd_hmu_setmode_hwctempdesired"
-        self._timer_prefix = f"sensor.{ep}_ebusd_700_hwctimer"
+        self._op_mode_raw: str | None = None
+        self._current_temp: float | None = None
+        self._target_temp: float | None = None
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -80,42 +76,61 @@ class VaillantHotWater(WaterHeaterEntity):
         )
 
     async def async_added_to_hass(self) -> None:
-        self.async_on_remove(
-            async_track_state_change_event(
-                self.hass,
-                [self._mode_id, self._temp_id, self._target_id],
-                self._on_state_change,
+        base = f"{self._mp}/700"
+        for topic, handler in [
+            (f"{base}/HwcOpMode",      self._on_op_mode),
+            (f"{base}/HwcStorageTemp", self._on_current_temp),
+            (f"{base}/HwcTempDesired", self._on_target_temp),
+        ]:
+            self.async_on_remove(
+                await mqtt.async_subscribe(self.hass, topic, handler)
             )
-        )
+
+    def _val(self, msg) -> str | float | None:
+        try:
+            return json.loads(msg.payload)["value"]
+        except (json.JSONDecodeError, KeyError, TypeError):
+            return None
+
+    def _float_val(self, msg) -> float | None:
+        v = self._val(msg)
+        try:
+            return float(v) if v is not None else None
+        except (ValueError, TypeError):
+            return None
 
     @callback
-    def _on_state_change(self, event) -> None:
+    def _on_op_mode(self, msg) -> None:
+        v = self._val(msg)
+        if v is not None:
+            self._op_mode_raw = str(v)
         self.async_write_ha_state()
 
-    def _float_state(self, entity_id: str) -> float | None:
-        s = self.hass.states.get(entity_id)
-        if s and s.state not in ("unknown", "unavailable"):
-            try:
-                return float(s.state)
-            except ValueError:
-                pass
-        return None
+    @callback
+    def _on_current_temp(self, msg) -> None:
+        v = self._float_val(msg)
+        if v is not None:
+            self._current_temp = v
+        self.async_write_ha_state()
+
+    @callback
+    def _on_target_temp(self, msg) -> None:
+        v = self._float_val(msg)
+        if v is not None and v > 0:
+            self._target_temp = v
+        self.async_write_ha_state()
 
     @property
     def current_operation(self) -> str:
-        s = self.hass.states.get(self._mode_id)
-        if s is None or s.state in ("unknown", "unavailable"):
-            return "off"
-        return s.state
+        return self._op_mode_raw or "off"
 
     @property
     def current_temperature(self) -> float | None:
-        return self._float_state(self._temp_id)
+        return self._current_temp
 
     @property
     def target_temperature(self) -> float | None:
-        val = self._float_state(self._target_id)
-        return val if val is not None and val > 0 else None
+        return self._target_temp
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -123,8 +138,8 @@ class VaillantHotWater(WaterHeaterEntity):
         for day in DAYS:
             slots = []
             for suffix in SLOT_SUFFIXES:
-                f = self.hass.states.get(f"{self._timer_prefix}_{day.lower()}_from{suffix}")
-                t = self.hass.states.get(f"{self._timer_prefix}_{day.lower()}_to{suffix}")
+                f = self.hass.states.get(f"sensor.{self._ep}_ebusd_700_hwctimer_{day.lower()}_from{suffix}")
+                t = self.hass.states.get(f"sensor.{self._ep}_ebusd_700_hwctimer_{day.lower()}_to{suffix}")
                 if (
                     f and f.state not in ("unknown", "unavailable", _EMPTY)
                     and t and t.state not in ("unknown", "unavailable", _EMPTY)
@@ -134,11 +149,10 @@ class VaillantHotWater(WaterHeaterEntity):
         return {"time_program": timer}
 
     async def async_set_operation_mode(self, operation_mode: str) -> None:
-        await self.hass.services.async_call(
-            "select",
-            "select_option",
-            {"entity_id": self._mode_id, "option": operation_mode},
-            blocking=True,
+        await mqtt.async_publish(
+            self.hass,
+            f"{self._mp}/700/HwcOpMode/set",
+            json.dumps({"value": operation_mode}),
         )
 
     async def async_set_temperature(self, **kwargs) -> None:
@@ -146,8 +160,8 @@ class VaillantHotWater(WaterHeaterEntity):
         if temp is not None:
             await mqtt.async_publish(
                 self.hass,
-                f"{self._mp}/hmu/SetMode/set",
-                json.dumps({"hwctempdesired": float(temp)}),
+                f"{self._mp}/700/HwcTempDesired/set",
+                json.dumps({"value": float(temp)}),
             )
 
     async def async_set_time_program(self, day: str, slots: list[dict]) -> None:
@@ -162,6 +176,6 @@ class VaillantHotWater(WaterHeaterEntity):
     async def async_trigger_legionella_protection(self) -> None:
         await mqtt.async_publish(
             self.hass,
-            f"{self._mp}/hmu/SetMode/set",
-            json.dumps({"hwctempdesired": 70}),
+            f"{self._mp}/700/HwcTempDesired/set",
+            json.dumps({"value": 70}),
         )
