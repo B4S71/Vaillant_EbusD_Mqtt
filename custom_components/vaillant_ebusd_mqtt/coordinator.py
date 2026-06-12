@@ -72,7 +72,13 @@ class VaillantEbusdCoordinator:
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
         self._hass = hass
         self._config_entry = config_entry
-        _base: str = config_entry.data[CONF_EBUSD_PREFIX]
+        # Support both new ("ebusd_prefix") and old ("mqtt_prefix") config entry formats.
+        if CONF_EBUSD_PREFIX in config_entry.data:
+            _base: str = config_entry.data[CONF_EBUSD_PREFIX]
+        else:
+            _old = config_entry.data.get("mqtt_prefix", "ebusd/700")
+            parts = _old.split("/")
+            _base = "/".join(parts[:-1]) if len(parts) > 1 else _old
         self._mqtt_prefix: str = f"{_base}/700"
         self._hmu_prefix: str = f"{_base}/hmu"
         self._broadcast_prefix: str = f"{_base}/broadcast"
