@@ -44,16 +44,20 @@ async def async_setup_entry(
     )
 
 
+_EBUSD_TO_OP = {"off": "off", "auto": "eco", "day": "performance", "night": "eco"}
+_OP_TO_EBUSD = {"off": "off", "eco": "auto", "performance": "day"}
+
+
 class VaillantHotWater(WaterHeaterEntity):
     _attr_should_poll = False
     _attr_name = "Vaillant Warmwasser"
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
-    _attr_operation_list = ["off", "auto", "day", "night"]
+    _attr_operation_list = ["off", "eco", "performance"]
     _attr_supported_features = (
         WaterHeaterEntityFeature.TARGET_TEMPERATURE
         | WaterHeaterEntityFeature.OPERATION_MODE
     )
-    _attr_min_temp = 40.0
+    _attr_min_temp = 35.0
     _attr_max_temp = 70.0
 
     def __init__(self, config_entry: ConfigEntry) -> None:
@@ -122,7 +126,7 @@ class VaillantHotWater(WaterHeaterEntity):
 
     @property
     def current_operation(self) -> str:
-        return self._op_mode_raw or "off"
+        return _EBUSD_TO_OP.get(self._op_mode_raw or "off", "off")
 
     @property
     def current_temperature(self) -> float | None:
@@ -152,7 +156,7 @@ class VaillantHotWater(WaterHeaterEntity):
         await mqtt.async_publish(
             self.hass,
             f"{self._mp}/700/HwcOpMode/set",
-            json.dumps({"value": operation_mode}),
+            json.dumps({"value": _OP_TO_EBUSD.get(operation_mode, "auto")}),
         )
 
     async def async_set_temperature(self, **kwargs) -> None:
