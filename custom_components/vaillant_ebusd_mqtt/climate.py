@@ -112,7 +112,7 @@ class VaillantHeatingClimate(ClimateEntity):
     @property
     def target_temperature(self) -> float | None:
         val = self._float_state(self._flow_id)
-        return val if val else None
+        return val if val is not None and val > 0 else None
 
     @property
     def extra_state_attributes(self) -> dict:
