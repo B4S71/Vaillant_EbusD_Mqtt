@@ -5,7 +5,7 @@ import json
 import voluptuous as vol
 
 from homeassistant.components import mqtt
-from homeassistant.components.climate import ClimateEntity, ClimateEntityFeature, HVACMode
+from homeassistant.components.climate import ClimateEntity, ClimateEntityFeature, HVACAction, HVACMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant, callback
@@ -163,6 +163,19 @@ class VaillantHeatingClimate(ClimateEntity):
     @property
     def hvac_mode(self) -> HVACMode:
         return _EBUSD_TO_HVAC.get(self._hvac_mode_raw or "", HVACMode.OFF)
+
+    @property
+    def hvac_action(self) -> HVACAction:
+        if self._hvac_mode_raw in (None, "off"):
+            return HVACAction.OFF
+        cur = self._current_temp
+        if self._hvac_mode_raw == "night":
+            if cur is not None and self._temp_low is not None:
+                return HVACAction.HEATING if cur < self._temp_low - 0.3 else HVACAction.IDLE
+        else:  # auto / day
+            if cur is not None and self._temp_high is not None:
+                return HVACAction.HEATING if cur < self._temp_high - 0.3 else HVACAction.IDLE
+        return HVACAction.IDLE
 
     @property
     def current_temperature(self) -> float | None:
