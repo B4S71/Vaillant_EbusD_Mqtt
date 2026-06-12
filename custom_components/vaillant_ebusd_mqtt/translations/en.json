@@ -9,6 +9,7 @@
           "hmu_prefix": "HMU prefix (SetMode / StatusCirPump / …)",
           "heating_name": "Heating circuit entity name",
           "hot_water_name": "Hot water entity name",
+          "hwc_storage_temp_topic": "MQTT topic for hot water storage temperature (empty = auto: {mqtt_prefix}/HwcStorageTemp)",
           "flow_temp_topic": "MQTT topic for flow temperature (optional)",
           "room_temp_topic": "MQTT topic for room temperature (optional)",
           "outdoor_temp_topic": "MQTT topic for outdoor temperature (optional)"

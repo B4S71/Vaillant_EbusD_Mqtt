@@ -91,6 +91,10 @@ class VaillantHotWater(VaillantEbusdEntity, WaterHeaterEntity):
     # ------------------------------------------------------------------
 
     @property
+    def current_temperature(self) -> float | None:
+        return self._coordinator.current_hwc_storage_temp
+
+    @property
     def current_operation(self) -> str:
         if self._coordinator.disable_hwc_load:
             return OPERATION_OFF

@@ -8,6 +8,7 @@ CONF_HOT_WATER_NAME = "hot_water_name"
 CONF_FLOW_TEMP_TOPIC = "flow_temp_topic"
 CONF_ROOM_TEMP_TOPIC = "room_temp_topic"
 CONF_OUTDOOR_TEMP_TOPIC = "outdoor_temp_topic"
+CONF_HWC_STORAGE_TEMP_TOPIC = "hwc_storage_temp_topic"
 
 # Defaults
 DEFAULT_MQTT_PREFIX = "ebusd/700"
@@ -49,3 +50,4 @@ ATTR_HWC_MODE_ACTIVE = "hwc_mode_active"
 ATTR_CURRENT_FLOW_TEMP = "current_flow_temp"
 ATTR_CURRENT_ROOM_TEMP = "current_room_temp"
 ATTR_CURRENT_OUTDOOR_TEMP = "current_outdoor_temp"
+ATTR_CURRENT_HWC_STORAGE_TEMP = "current_hwc_storage_temp"

@@ -11,6 +11,7 @@ from homeassistant.core import HomeAssistant, callback
 from .const import (
     ATTR_CIR_PUMP_ACTIVE,
     ATTR_CURRENT_FLOW_TEMP,
+    ATTR_CURRENT_HWC_STORAGE_TEMP,
     ATTR_CURRENT_OUTDOOR_TEMP,
     ATTR_CURRENT_ROOM_TEMP,
     ATTR_DISABLE_HC,
@@ -26,6 +27,7 @@ from .const import (
     ATTR_HWC_TEMP_DESIRED,
     CONF_FLOW_TEMP_TOPIC,
     CONF_HMU_PREFIX,
+    CONF_HWC_STORAGE_TEMP_TOPIC,
     CONF_MQTT_PREFIX,
     CONF_OUTDOOR_TEMP_TOPIC,
     CONF_ROOM_TEMP_TOPIC,
@@ -70,6 +72,11 @@ class VaillantEbusdCoordinator:
         self._flow_temp_topic: str = config_entry.data.get(CONF_FLOW_TEMP_TOPIC, "")
         self._room_temp_topic: str = config_entry.data.get(CONF_ROOM_TEMP_TOPIC, "")
         self._outdoor_temp_topic: str = config_entry.data.get(CONF_OUTDOOR_TEMP_TOPIC, "")
+        # Auto-derive HwcStorageTemp topic from mqtt_prefix if not overridden
+        hwc_storage_override = config_entry.data.get(CONF_HWC_STORAGE_TEMP_TOPIC, "")
+        self._hwc_storage_temp_topic: str = (
+            hwc_storage_override if hwc_storage_override else f"{self._mqtt_prefix}/HwcStorageTemp"
+        )
 
         # Time programs: day → list[{"from": "HH:MM", "to": "HH:MM"}]
         self.cc_timer: dict[str, list[dict]] = {}
@@ -95,6 +102,7 @@ class VaillantEbusdCoordinator:
         self.current_flow_temp: float | None = None
         self.current_room_temp: float | None = None
         self.current_outdoor_temp: float | None = None
+        self.current_hwc_storage_temp: float | None = None
 
         self._listeners: list[Callable] = []
         self._unsubscribe: list[Callable] = []
@@ -173,6 +181,7 @@ class VaillantEbusdCoordinator:
             (self._flow_temp_topic, ATTR_CURRENT_FLOW_TEMP),
             (self._room_temp_topic, ATTR_CURRENT_ROOM_TEMP),
             (self._outdoor_temp_topic, ATTR_CURRENT_OUTDOOR_TEMP),
+            (self._hwc_storage_temp_topic, ATTR_CURRENT_HWC_STORAGE_TEMP),
         ):
             if topic:
                 self._unsubscribe.append(

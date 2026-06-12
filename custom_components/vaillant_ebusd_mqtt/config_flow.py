@@ -10,6 +10,7 @@ from .const import (
     CONF_HEATING_NAME,
     CONF_HMU_PREFIX,
     CONF_HOT_WATER_NAME,
+    CONF_HWC_STORAGE_TEMP_TOPIC,
     CONF_MQTT_PREFIX,
     CONF_OUTDOOR_TEMP_TOPIC,
     CONF_ROOM_TEMP_TOPIC,
@@ -26,7 +27,8 @@ STEP_USER_SCHEMA = vol.Schema(
         vol.Required(CONF_HMU_PREFIX, default=DEFAULT_HMU_PREFIX): str,
         vol.Optional(CONF_HEATING_NAME, default=DEFAULT_HEATING_NAME): str,
         vol.Optional(CONF_HOT_WATER_NAME, default=DEFAULT_HOT_WATER_NAME): str,
-        # Optional measured-temperature topics — leave blank to disable
+        # Optional measured-temperature topics — leave blank to use auto-derived default or disable
+        vol.Optional(CONF_HWC_STORAGE_TEMP_TOPIC, default=""): str,
         vol.Optional(CONF_FLOW_TEMP_TOPIC, default=""): str,
         vol.Optional(CONF_ROOM_TEMP_TOPIC, default=""): str,
         vol.Optional(CONF_OUTDOOR_TEMP_TOPIC, default=""): str,

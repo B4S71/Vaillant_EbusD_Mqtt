@@ -9,6 +9,7 @@
           "hmu_prefix": "HMU-Präfix (SetMode / StatusCirPump / …)",
           "heating_name": "Name Heizkreis-Entity",
           "hot_water_name": "Name Warmwasser-Entity",
+          "hwc_storage_temp_topic": "MQTT-Topic Warmwasserspeicher-Temperatur (leer = auto: {mqtt_prefix}/HwcStorageTemp)",
           "flow_temp_topic": "MQTT-Topic Vorlauftemperatur (optional)",
           "room_temp_topic": "MQTT-Topic Raumtemperatur (optional)",
           "outdoor_temp_topic": "MQTT-Topic Außentemperatur (optional)"
