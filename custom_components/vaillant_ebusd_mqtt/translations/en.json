@@ -3,17 +3,41 @@
     "step": {
       "user": {
         "title": "Set up Vaillant eBusd MQTT",
-        "description": "Enter the MQTT topic prefixes from your ebusd configuration.",
+        "description": "Enter the MQTT topic prefixes from your ebusd configuration. Temperature topics are optional.",
         "data": {
-          "mqtt_prefix": "MQTT prefix (CcTimer / HwcTimer)",
-          "hmu_prefix": "HMU prefix (SetMode)",
+          "mqtt_prefix": "MQTT prefix (CcTimer / HwcTimer / PrEnergySum)",
+          "hmu_prefix": "HMU prefix (SetMode / StatusCirPump / …)",
           "heating_name": "Heating circuit entity name",
-          "hot_water_name": "Hot water entity name"
+          "hot_water_name": "Hot water entity name",
+          "flow_temp_topic": "MQTT topic for flow temperature (optional)",
+          "room_temp_topic": "MQTT topic for room temperature (optional)",
+          "outdoor_temp_topic": "MQTT topic for outdoor temperature (optional)"
         }
       }
     },
     "abort": {
       "already_configured": "This ebusd instance is already configured."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "flow_temp_desired": { "name": "Flow temperature setpoint" },
+      "hwc_temp_desired": { "name": "Hot water temperature setpoint" },
+      "hwc_flow_temp_desired": { "name": "Hot water flow temperature setpoint" },
+      "hc_mode": { "name": "Heating circuit mode" },
+      "energy_sum": { "name": "Heat pump energy total" },
+      "current_flow_temp": { "name": "Flow temperature (current)" },
+      "current_room_temp": { "name": "Room temperature (current)" },
+      "current_outdoor_temp": { "name": "Outdoor temperature (current)" }
+    },
+    "binary_sensor": {
+      "hmu_on": { "name": "Heat pump active" },
+      "cir_pump_active": { "name": "Circulation pump" },
+      "hc_mode_active": { "name": "Heating active" },
+      "hwc_mode_active": { "name": "Hot water heating" },
+      "disable_hc": { "name": "Heating circuit disabled" },
+      "disable_hwc_load": { "name": "Hot water load disabled" },
+      "disable_hwc_tapping": { "name": "Hot water tapping disabled" }
     }
   }
 }

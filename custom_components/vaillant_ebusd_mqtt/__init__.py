@@ -6,7 +6,7 @@ from homeassistant.core import HomeAssistant
 from .const import DOMAIN
 from .coordinator import VaillantEbusdCoordinator
 
-PLATFORMS = ["climate", "water_heater"]
+PLATFORMS = ["binary_sensor", "climate", "sensor", "water_heater"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

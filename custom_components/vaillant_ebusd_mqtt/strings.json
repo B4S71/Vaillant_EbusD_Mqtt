@@ -3,12 +3,15 @@
     "step": {
       "user": {
         "title": "Vaillant eBusd MQTT einrichten",
-        "description": "MQTT-Topic-Präfixe aus der ebusd-Konfiguration eingeben.",
+        "description": "MQTT-Topic-Präfixe aus der ebusd-Konfiguration eingeben. Temperatur-Topics sind optional und können leer gelassen werden.",
         "data": {
-          "mqtt_prefix": "MQTT-Präfix (CcTimer / HwcTimer)",
-          "hmu_prefix": "HMU-Präfix (SetMode)",
+          "mqtt_prefix": "MQTT-Präfix (CcTimer / HwcTimer / PrEnergySum)",
+          "hmu_prefix": "HMU-Präfix (SetMode / StatusCirPump / …)",
           "heating_name": "Name Heizkreis-Entity",
-          "hot_water_name": "Name Warmwasser-Entity"
+          "hot_water_name": "Name Warmwasser-Entity",
+          "flow_temp_topic": "MQTT-Topic Vorlauftemperatur (optional)",
+          "room_temp_topic": "MQTT-Topic Raumtemperatur (optional)",
+          "outdoor_temp_topic": "MQTT-Topic Außentemperatur (optional)"
         }
       }
     },
@@ -16,34 +19,47 @@
       "already_configured": "Diese ebusd-Instanz ist bereits konfiguriert."
     }
   },
+  "entity": {
+    "sensor": {
+      "flow_temp_desired": { "name": "Vorlauf-Solltemperatur" },
+      "hwc_temp_desired": { "name": "Warmwasser-Solltemperatur" },
+      "hwc_flow_temp_desired": { "name": "Warmwasser-Vorlauf-Solltemperatur" },
+      "hc_mode": { "name": "Heizkreis-Modus" },
+      "energy_sum": { "name": "Wärmepumpe Energiesumme" },
+      "current_flow_temp": { "name": "Vorlauftemperatur (aktuell)" },
+      "current_room_temp": { "name": "Raumtemperatur (aktuell)" },
+      "current_outdoor_temp": { "name": "Außentemperatur (aktuell)" }
+    },
+    "binary_sensor": {
+      "hmu_on": { "name": "Wärmepumpe aktiv" },
+      "cir_pump_active": { "name": "Zirkulationspumpe" },
+      "hc_mode_active": { "name": "Heizbetrieb aktiv" },
+      "hwc_mode_active": { "name": "Warmwasser bereitet auf" },
+      "disable_hc": { "name": "Heizkreis gesperrt" },
+      "disable_hwc_load": { "name": "Warmwasserladung gesperrt" },
+      "disable_hwc_tapping": { "name": "Warmwasserentnahme gesperrt" }
+    }
+  },
   "services": {
     "set_heating_time_program": {
       "name": "Heizungs-Zeitprogramm setzen",
-      "description": "Setzt das Zeitprogramm für einen Wochentag im Vaillant-Heizkreis.",
+      "description": "Setzt das Zeitprogramm für einen Wochentag im Vaillant-Heizkreis (CcTimer).",
       "fields": {
-        "day": {
-          "name": "Wochentag",
-          "description": "Englischer Tagesname (Monday … Sunday)"
-        },
-        "slots": {
-          "name": "Zeitfenster",
-          "description": "Liste mit max. 3 Einträgen: [{from: HH:MM, to: HH:MM}]"
-        }
+        "day": { "name": "Wochentag", "description": "Englischer Tagesname (Monday … Sunday)" },
+        "slots": { "name": "Zeitfenster", "description": "Max. 3 Einträge: [{from: HH:MM, to: HH:MM}]" }
       }
     },
     "set_hot_water_time_program": {
       "name": "Warmwasser-Zeitprogramm setzen",
-      "description": "Setzt das Zeitprogramm für einen Wochentag im Vaillant-Warmwasserkreis.",
+      "description": "Setzt das Zeitprogramm für einen Wochentag im Vaillant-Warmwasserkreis (HwcTimer).",
       "fields": {
-        "day": {
-          "name": "Wochentag",
-          "description": "Englischer Tagesname (Monday … Sunday)"
-        },
-        "slots": {
-          "name": "Zeitfenster",
-          "description": "Liste mit max. 3 Einträgen: [{from: HH:MM, to: HH:MM}]"
-        }
+        "day": { "name": "Wochentag", "description": "Englischer Tagesname (Monday … Sunday)" },
+        "slots": { "name": "Zeitfenster", "description": "Max. 3 Einträge: [{from: HH:MM, to: HH:MM}]" }
       }
+    },
+    "trigger_legionella_protection": {
+      "name": "Legionellenschutz auslösen",
+      "description": "Setzt die Warmwasser-Solltemperatur einmalig auf 70 °C für einen Legionellenschutz-Zyklus."
     }
   }
 }
