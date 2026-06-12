@@ -67,6 +67,7 @@ class VaillantHeatingClimate(ClimateEntity):
         self._attr_unique_id = f"{config_entry.entry_id}_heating"
 
         self._hvac_mode_raw: str | None = None
+        self._hmu_state: str | None = None
         self._temp_high: float | None = None
         self._temp_low: float | None = None
         self._current_temp: float | None = None
@@ -93,6 +94,7 @@ class VaillantHeatingClimate(ClimateEntity):
             (f"{base}/RoomHumidity",         self._on_humidity),
             (f"{base}/DisplayedOutsideTemp", self._on_outside_temp),
             (f"{base}/Z1SfMode",             self._on_preset),
+            (f"{self._mp}/hmu/State",        self._on_hmu_state),
         ]:
             self.async_on_remove(
                 await mqtt.async_subscribe(self.hass, topic, handler)
@@ -160,6 +162,14 @@ class VaillantHeatingClimate(ClimateEntity):
             self._preset_raw = str(v)
         self.async_write_ha_state()
 
+    @callback
+    def _on_hmu_state(self, msg) -> None:
+        try:
+            self._hmu_state = str(json.loads(msg.payload)["state"])
+        except (json.JSONDecodeError, KeyError, TypeError):
+            pass
+        self.async_write_ha_state()
+
     @property
     def hvac_mode(self) -> HVACMode:
         return _EBUSD_TO_HVAC.get(self._hvac_mode_raw or "", HVACMode.OFF)
@@ -168,11 +178,19 @@ class VaillantHeatingClimate(ClimateEntity):
     def hvac_action(self) -> HVACAction:
         if self._hvac_mode_raw in (None, "off"):
             return HVACAction.OFF
+        # Primary: real HMU state from ebusd/hmu/State
+        if self._hmu_state == "heating":
+            return HVACAction.HEATING
+        if self._hmu_state == "cooling":
+            return HVACAction.COOLING
+        if self._hmu_state in ("ready", "heating_water", "error"):
+            return HVACAction.IDLE
+        # Fallback: derive from current vs target temperature
         cur = self._current_temp
         if self._hvac_mode_raw == "night":
             if cur is not None and self._temp_low is not None:
                 return HVACAction.HEATING if cur < self._temp_low - 0.3 else HVACAction.IDLE
-        else:  # auto / day
+        else:
             if cur is not None and self._temp_high is not None:
                 return HVACAction.HEATING if cur < self._temp_high - 0.3 else HVACAction.IDLE
         return HVACAction.IDLE
