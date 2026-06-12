@@ -1,0 +1,19 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Vaillant eBusd MQTT einrichten",
+        "description": "MQTT-Topic-Präfixe aus der ebusd-Konfiguration eingeben.",
+        "data": {
+          "mqtt_prefix": "MQTT-Präfix (CcTimer / HwcTimer)",
+          "hmu_prefix": "HMU-Präfix (SetMode)",
+          "heating_name": "Name der Heizkreis-Entity",
+          "hot_water_name": "Name der Warmwasser-Entity"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Diese ebusd-Instanz ist bereits konfiguriert."
+    }
+  }
+}

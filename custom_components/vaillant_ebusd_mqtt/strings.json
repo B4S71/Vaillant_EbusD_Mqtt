@@ -1,0 +1,49 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Vaillant eBusd MQTT einrichten",
+        "description": "MQTT-Topic-Präfixe aus der ebusd-Konfiguration eingeben.",
+        "data": {
+          "mqtt_prefix": "MQTT-Präfix (CcTimer / HwcTimer)",
+          "hmu_prefix": "HMU-Präfix (SetMode)",
+          "heating_name": "Name Heizkreis-Entity",
+          "hot_water_name": "Name Warmwasser-Entity"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Diese ebusd-Instanz ist bereits konfiguriert."
+    }
+  },
+  "services": {
+    "set_heating_time_program": {
+      "name": "Heizungs-Zeitprogramm setzen",
+      "description": "Setzt das Zeitprogramm für einen Wochentag im Vaillant-Heizkreis.",
+      "fields": {
+        "day": {
+          "name": "Wochentag",
+          "description": "Englischer Tagesname (Monday … Sunday)"
+        },
+        "slots": {
+          "name": "Zeitfenster",
+          "description": "Liste mit max. 3 Einträgen: [{from: HH:MM, to: HH:MM}]"
+        }
+      }
+    },
+    "set_hot_water_time_program": {
+      "name": "Warmwasser-Zeitprogramm setzen",
+      "description": "Setzt das Zeitprogramm für einen Wochentag im Vaillant-Warmwasserkreis.",
+      "fields": {
+        "day": {
+          "name": "Wochentag",
+          "description": "Englischer Tagesname (Monday … Sunday)"
+        },
+        "slots": {
+          "name": "Zeitfenster",
+          "description": "Liste mit max. 3 Einträgen: [{from: HH:MM, to: HH:MM}]"
+        }
+      }
+    }
+  }
+}

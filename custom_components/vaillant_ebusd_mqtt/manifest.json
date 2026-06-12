@@ -1,0 +1,12 @@
+{
+  "domain": "vaillant_ebusd_mqtt",
+  "name": "Vaillant eBusd MQTT",
+  "version": "0.1.0",
+  "documentation": "https://github.com/B4S71/Vaillant_EbusD_Mqtt",
+  "issue_tracker": "https://github.com/B4S71/Vaillant_EbusD_Mqtt/issues",
+  "requirements": [],
+  "dependencies": ["mqtt"],
+  "codeowners": ["@B4S71"],
+  "config_flow": true,
+  "iot_class": "local_push"
+}

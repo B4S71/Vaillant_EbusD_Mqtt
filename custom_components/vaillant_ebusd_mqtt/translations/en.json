@@ -1,0 +1,19 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Vaillant eBusd MQTT",
+        "description": "Enter the MQTT topic prefixes from your ebusd configuration.",
+        "data": {
+          "mqtt_prefix": "MQTT prefix (CcTimer / HwcTimer)",
+          "hmu_prefix": "HMU prefix (SetMode)",
+          "heating_name": "Heating circuit entity name",
+          "hot_water_name": "Hot water entity name"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This ebusd instance is already configured."
+    }
+  }
+}

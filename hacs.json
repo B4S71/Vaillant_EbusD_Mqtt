@@ -1,0 +1,8 @@
+{
+  "name": "Vaillant eBusd MQTT",
+  "domain": "vaillant_ebusd_mqtt",
+  "documentation": "https://github.com/B4S71/Vaillant_EbusD_Mqtt",
+  "issue_tracker": "https://github.com/B4S71/Vaillant_EbusD_Mqtt/issues",
+  "codeowners": ["@B4S71"],
+  "render_readme": true
+}
