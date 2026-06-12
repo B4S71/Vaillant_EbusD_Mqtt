@@ -5,11 +5,18 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
 
-from .const import CONF_EBUSD_PREFIX, DEFAULT_EBUSD_PREFIX, DOMAIN
+from .const import (
+    CONF_ENTITY_PREFIX,
+    CONF_MQTT_PREFIX,
+    DEFAULT_ENTITY_PREFIX,
+    DEFAULT_MQTT_PREFIX,
+    DOMAIN,
+)
 
 STEP_USER_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_EBUSD_PREFIX, default=DEFAULT_EBUSD_PREFIX): str,
+        vol.Required(CONF_ENTITY_PREFIX, default=DEFAULT_ENTITY_PREFIX): str,
+        vol.Required(CONF_MQTT_PREFIX, default=DEFAULT_MQTT_PREFIX): str,
     }
 )
 
@@ -19,15 +26,9 @@ class VaillantEbusdConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    async def async_step_user(
-        self, user_input: dict | None = None
-    ) -> FlowResult:
+    async def async_step_user(self, user_input: dict | None = None) -> FlowResult:
         if user_input is not None:
-            await self.async_set_unique_id(user_input[CONF_EBUSD_PREFIX])
+            await self.async_set_unique_id(user_input[CONF_ENTITY_PREFIX])
             self._abort_if_unique_id_configured()
-            return self.async_create_entry(
-                title="Vaillant ebusd",
-                data=user_input,
-            )
-
+            return self.async_create_entry(title="Vaillant ebusd", data=user_input)
         return self.async_show_form(step_id="user", data_schema=STEP_USER_SCHEMA)

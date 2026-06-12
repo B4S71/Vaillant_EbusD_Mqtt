@@ -3,46 +3,15 @@
     "step": {
       "user": {
         "title": "Set up Vaillant eBusd MQTT",
-        "description": "Enter the ebusd base topic (the part before /700, /hmu, /omu, etc.).",
+        "description": "Enter the entity prefix used by your ebusd_vaillant integration and the MQTT base topic used by ebusd.",
         "data": {
-          "ebusd_prefix": "ebusd base topic (e.g. ebusd)"
+          "entity_prefix": "Entity prefix (e.g. heating)",
+          "mqtt_prefix": "MQTT base topic (e.g. ebusd)"
         }
       }
     },
     "abort": {
       "already_configured": "This ebusd instance is already configured."
-    }
-  },
-  "entity": {
-    "sensor": {
-      "flow_temp_desired": { "name": "Flow temperature setpoint" },
-      "hwc_temp_desired": { "name": "Hot water temperature setpoint" },
-      "hwc_flow_temp_desired": { "name": "Hot water flow temperature setpoint" },
-      "hc_mode": { "name": "Heating circuit mode" },
-      "energy_sum": { "name": "Heat pump energy total" },
-      "current_flow_temp": { "name": "Flow temperature" },
-      "current_room_temp": { "name": "Room temperature" },
-      "current_hwc_storage_temp": { "name": "Hot water storage temperature" },
-      "current_outdoor_temp": { "name": "Outdoor temperature" },
-      "vwz_electric_energy": { "name": "Electricity consumption total" },
-      "vwz_environment_energy": { "name": "Environmental heat total" }
-    },
-    "binary_sensor": {
-      "hmu_on": { "name": "Heat pump active" },
-      "cir_pump_active": { "name": "Circulation pump" },
-      "hc_mode_active": { "name": "Heating active" },
-      "hwc_mode_active": { "name": "Hot water heating" },
-      "disable_hc": { "name": "Heating circuit disabled" },
-      "disable_hwc_load": { "name": "Hot water load disabled" },
-      "disable_hwc_tapping": { "name": "Hot water tapping disabled" },
-      "omu_comp_active": { "name": "Compressor active" },
-      "omu_defrost": { "name": "Defrost active" },
-      "omu_fan_running": { "name": "Fan running" },
-      "omu_fan_error": { "name": "Fan error" },
-      "omu_cooling_active": { "name": "Cooling active" },
-      "omu_deicing_active": { "name": "De-icing active" },
-      "omu_stb_error": { "name": "STB error" },
-      "omu_source_ok": { "name": "Source OK" }
     }
   }
 }
