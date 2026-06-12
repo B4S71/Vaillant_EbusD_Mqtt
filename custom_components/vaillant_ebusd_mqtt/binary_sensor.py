@@ -42,92 +42,92 @@ BINARY_DESCRIPTIONS: tuple[VaillantBinaryDescription, ...] = (
     # HMU status
     VaillantBinaryDescription(
         key=ATTR_HMU_ON,
-        translation_key=ATTR_HMU_ON,
+        name="Wärmepumpe aktiv",
         coordinator_attr=ATTR_HMU_ON,
         device_class=BinarySensorDeviceClass.RUNNING,
     ),
     VaillantBinaryDescription(
         key=ATTR_CIR_PUMP_ACTIVE,
-        translation_key=ATTR_CIR_PUMP_ACTIVE,
+        name="Zirkulationspumpe",
         coordinator_attr=ATTR_CIR_PUMP_ACTIVE,
         device_class=BinarySensorDeviceClass.RUNNING,
     ),
     VaillantBinaryDescription(
         key=ATTR_HC_MODE_ACTIVE,
-        translation_key=ATTR_HC_MODE_ACTIVE,
+        name="Heizbetrieb aktiv",
         coordinator_attr=ATTR_HC_MODE_ACTIVE,
         device_class=BinarySensorDeviceClass.HEAT,
     ),
     VaillantBinaryDescription(
         key=ATTR_HWC_MODE_ACTIVE,
-        translation_key=ATTR_HWC_MODE_ACTIVE,
+        name="Warmwasser bereitet auf",
         coordinator_attr=ATTR_HWC_MODE_ACTIVE,
         device_class=BinarySensorDeviceClass.HEAT,
     ),
     VaillantBinaryDescription(
         key=ATTR_DISABLE_HC,
-        translation_key=ATTR_DISABLE_HC,
+        name="Heizkreis gesperrt",
         coordinator_attr=ATTR_DISABLE_HC,
         device_class=BinarySensorDeviceClass.PROBLEM,
     ),
     VaillantBinaryDescription(
         key=ATTR_DISABLE_HWC_LOAD,
-        translation_key=ATTR_DISABLE_HWC_LOAD,
+        name="Warmwasserladung gesperrt",
         coordinator_attr=ATTR_DISABLE_HWC_LOAD,
         device_class=BinarySensorDeviceClass.PROBLEM,
     ),
     VaillantBinaryDescription(
         key=ATTR_DISABLE_HWC_TAPPING,
-        translation_key=ATTR_DISABLE_HWC_TAPPING,
+        name="Warmwasserentnahme gesperrt",
         coordinator_attr=ATTR_DISABLE_HWC_TAPPING,
         device_class=BinarySensorDeviceClass.PROBLEM,
     ),
     # OMU (outdoor unit)
     VaillantBinaryDescription(
         key=ATTR_OMU_COMP_ACTIVE,
-        translation_key=ATTR_OMU_COMP_ACTIVE,
+        name="Kompressor aktiv",
         coordinator_attr=ATTR_OMU_COMP_ACTIVE,
         device_class=BinarySensorDeviceClass.RUNNING,
     ),
     VaillantBinaryDescription(
         key=ATTR_OMU_DEFROST,
-        translation_key=ATTR_OMU_DEFROST,
+        name="Abtauung aktiv",
         coordinator_attr=ATTR_OMU_DEFROST,
         device_class=BinarySensorDeviceClass.RUNNING,
     ),
     VaillantBinaryDescription(
         key=ATTR_OMU_FAN_RUNNING,
-        translation_key=ATTR_OMU_FAN_RUNNING,
+        name="Lüfter läuft",
         coordinator_attr=ATTR_OMU_FAN_RUNNING,
         device_class=BinarySensorDeviceClass.RUNNING,
     ),
     VaillantBinaryDescription(
         key=ATTR_OMU_FAN_ERROR,
-        translation_key=ATTR_OMU_FAN_ERROR,
+        name="Lüfterfehler",
         coordinator_attr=ATTR_OMU_FAN_ERROR,
         device_class=BinarySensorDeviceClass.PROBLEM,
     ),
     VaillantBinaryDescription(
         key=ATTR_OMU_COOLING_ACTIVE,
-        translation_key=ATTR_OMU_COOLING_ACTIVE,
+        name="Kühlung aktiv",
         coordinator_attr=ATTR_OMU_COOLING_ACTIVE,
         device_class=BinarySensorDeviceClass.COLD,
     ),
     VaillantBinaryDescription(
         key=ATTR_OMU_DEICING_ACTIVE,
-        translation_key=ATTR_OMU_DEICING_ACTIVE,
+        name="Enteisung aktiv",
         coordinator_attr=ATTR_OMU_DEICING_ACTIVE,
         device_class=BinarySensorDeviceClass.RUNNING,
     ),
     VaillantBinaryDescription(
         key=ATTR_OMU_STB_ERROR,
-        translation_key=ATTR_OMU_STB_ERROR,
+        name="STB-Fehler",
         coordinator_attr=ATTR_OMU_STB_ERROR,
         device_class=BinarySensorDeviceClass.PROBLEM,
     ),
     VaillantBinaryDescription(
         key=ATTR_OMU_SOURCE_OK,
-        translation_key=ATTR_OMU_SOURCE_OK,
+        name="Quelle OK",
         coordinator_attr=ATTR_OMU_SOURCE_OK,
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
     ),
@@ -150,6 +150,8 @@ async def async_setup_entry(
 
 class VaillantBinarySensor(VaillantEbusdEntity, BinarySensorEntity):
     """A binary sensor that reads a boolean value from the coordinator."""
+
+    _attr_has_entity_name = True
 
     def __init__(
         self,

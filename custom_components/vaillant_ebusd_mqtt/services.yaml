@@ -1,0 +1,51 @@
+set_heating_time_program:
+  target:
+    entity:
+      domain: climate
+      integration: vaillant_ebusd_mqtt
+  fields:
+    day:
+      required: true
+      selector:
+        select:
+          options:
+            - Monday
+            - Tuesday
+            - Wednesday
+            - Thursday
+            - Friday
+            - Saturday
+            - Sunday
+    slots:
+      required: true
+      selector:
+        object:
+
+set_hot_water_time_program:
+  target:
+    entity:
+      domain: water_heater
+      integration: vaillant_ebusd_mqtt
+  fields:
+    day:
+      required: true
+      selector:
+        select:
+          options:
+            - Monday
+            - Tuesday
+            - Wednesday
+            - Thursday
+            - Friday
+            - Saturday
+            - Sunday
+    slots:
+      required: true
+      selector:
+        object:
+
+trigger_legionella_protection:
+  target:
+    entity:
+      domain: water_heater
+      integration: vaillant_ebusd_mqtt

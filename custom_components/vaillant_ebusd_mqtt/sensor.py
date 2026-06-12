@@ -49,72 +49,68 @@ _ENERGY_PARAMS = dict(
 )
 
 SENSOR_DESCRIPTIONS: tuple[VaillantSensorDescription, ...] = (
-    # SetMode temperatures
     VaillantSensorDescription(
         key=ATTR_FLOW_TEMP_DESIRED,
-        translation_key=ATTR_FLOW_TEMP_DESIRED,
+        name="Vorlauf-Solltemperatur",
         coordinator_attr=ATTR_FLOW_TEMP_DESIRED,
         **_TEMP_PARAMS,
     ),
     VaillantSensorDescription(
         key=ATTR_HWC_TEMP_DESIRED,
-        translation_key=ATTR_HWC_TEMP_DESIRED,
+        name="Warmwasser-Solltemperatur",
         coordinator_attr=ATTR_HWC_TEMP_DESIRED,
         **_TEMP_PARAMS,
     ),
     VaillantSensorDescription(
         key=ATTR_HWC_FLOW_TEMP_DESIRED,
-        translation_key=ATTR_HWC_FLOW_TEMP_DESIRED,
+        name="Warmwasser-Vorlauf-Solltemperatur",
         coordinator_attr=ATTR_HWC_FLOW_TEMP_DESIRED,
         **_TEMP_PARAMS,
     ),
     VaillantSensorDescription(
         key=ATTR_HC_MODE,
-        translation_key=ATTR_HC_MODE,
+        name="Heizkreis-Modus",
         coordinator_attr=ATTR_HC_MODE,
     ),
-    # Energy (700)
     VaillantSensorDescription(
         key=ATTR_ENERGY_SUM,
-        translation_key=ATTR_ENERGY_SUM,
+        name="Wärmepumpe Energiesumme",
         coordinator_attr=ATTR_ENERGY_SUM,
         **_ENERGY_PARAMS,
     ),
-    # Measured temperatures
     VaillantSensorDescription(
         key=ATTR_CURRENT_FLOW_TEMP,
-        translation_key=ATTR_CURRENT_FLOW_TEMP,
+        name="Vorlauftemperatur",
         coordinator_attr=ATTR_CURRENT_FLOW_TEMP,
         **_TEMP_PARAMS,
     ),
     VaillantSensorDescription(
         key=ATTR_CURRENT_ROOM_TEMP,
-        translation_key=ATTR_CURRENT_ROOM_TEMP,
+        name="Raumtemperatur",
         coordinator_attr=ATTR_CURRENT_ROOM_TEMP,
         **_TEMP_PARAMS,
     ),
     VaillantSensorDescription(
         key=ATTR_CURRENT_HWC_STORAGE_TEMP,
-        translation_key=ATTR_CURRENT_HWC_STORAGE_TEMP,
+        name="Warmwasserspeicher-Temperatur",
         coordinator_attr=ATTR_CURRENT_HWC_STORAGE_TEMP,
         **_TEMP_PARAMS,
     ),
     VaillantSensorDescription(
         key=ATTR_CURRENT_OUTDOOR_TEMP,
-        translation_key=ATTR_CURRENT_OUTDOOR_TEMP,
+        name="Außentemperatur",
         coordinator_attr=ATTR_CURRENT_OUTDOOR_TEMP,
         **_TEMP_PARAMS,
     ),
-    # VWZ energy meter
     VaillantSensorDescription(
         key=ATTR_VWZ_ELECTRIC_ENERGY,
-        translation_key=ATTR_VWZ_ELECTRIC_ENERGY,
+        name="Stromverbrauch gesamt",
         coordinator_attr=ATTR_VWZ_ELECTRIC_ENERGY,
         **_ENERGY_PARAMS,
     ),
     VaillantSensorDescription(
         key=ATTR_VWZ_ENVIRONMENT_ENERGY,
-        translation_key=ATTR_VWZ_ENVIRONMENT_ENERGY,
+        name="Umgebungswärme gesamt",
         coordinator_attr=ATTR_VWZ_ENVIRONMENT_ENERGY,
         **_ENERGY_PARAMS,
     ),
@@ -134,6 +130,8 @@ async def async_setup_entry(
 
 class VaillantSensor(VaillantEbusdEntity, SensorEntity):
     """A sensor entity that reads a single value from the coordinator."""
+
+    _attr_has_entity_name = True
 
     def __init__(
         self,

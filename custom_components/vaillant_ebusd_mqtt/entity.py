@@ -11,7 +11,6 @@ from .coordinator import VaillantEbusdCoordinator
 class VaillantEbusdEntity(Entity):
     """Base class for all Vaillant eBusd entities."""
 
-    _attr_has_entity_name = True
     _attr_should_poll = False
 
     def __init__(
