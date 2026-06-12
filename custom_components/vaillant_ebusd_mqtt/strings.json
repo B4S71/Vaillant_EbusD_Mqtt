@@ -3,16 +3,10 @@
     "step": {
       "user": {
         "title": "Vaillant eBusd MQTT einrichten",
-        "description": "MQTT-Topic-Präfixe aus der ebusd-Konfiguration eingeben. Temperatur-Topics sind optional und können leer gelassen werden.",
+        "description": "MQTT-Topic-Präfixe aus der ebusd-Konfiguration eingeben.",
         "data": {
-          "mqtt_prefix": "MQTT-Präfix (CcTimer / HwcTimer / PrEnergySum)",
-          "hmu_prefix": "HMU-Präfix (SetMode / StatusCirPump / …)",
-          "heating_name": "Name Heizkreis-Entity",
-          "hot_water_name": "Name Warmwasser-Entity",
-          "hwc_storage_temp_topic": "MQTT-Topic Warmwasserspeicher-Temperatur (leer = auto: {mqtt_prefix}/HwcStorageTemp)",
-          "flow_temp_topic": "MQTT-Topic Vorlauftemperatur (optional)",
-          "room_temp_topic": "MQTT-Topic Raumtemperatur (optional)",
-          "outdoor_temp_topic": "MQTT-Topic Außentemperatur (optional)"
+          "mqtt_prefix": "MQTT-Präfix (ebusd/700)",
+          "hmu_prefix": "HMU-Präfix (ebusd/hmu)"
         }
       }
     },
@@ -27,9 +21,12 @@
       "hwc_flow_temp_desired": { "name": "Warmwasser-Vorlauf-Solltemperatur" },
       "hc_mode": { "name": "Heizkreis-Modus" },
       "energy_sum": { "name": "Wärmepumpe Energiesumme" },
-      "current_flow_temp": { "name": "Vorlauftemperatur (aktuell)" },
-      "current_room_temp": { "name": "Raumtemperatur (aktuell)" },
-      "current_outdoor_temp": { "name": "Außentemperatur (aktuell)" }
+      "current_flow_temp": { "name": "Vorlauftemperatur" },
+      "current_room_temp": { "name": "Raumtemperatur" },
+      "current_hwc_storage_temp": { "name": "Warmwasserspeicher-Temperatur" },
+      "current_outdoor_temp": { "name": "Außentemperatur" },
+      "vwz_electric_energy": { "name": "Stromverbrauch gesamt" },
+      "vwz_environment_energy": { "name": "Umgebungswärme gesamt" }
     },
     "binary_sensor": {
       "hmu_on": { "name": "Wärmepumpe aktiv" },
@@ -38,7 +35,15 @@
       "hwc_mode_active": { "name": "Warmwasser bereitet auf" },
       "disable_hc": { "name": "Heizkreis gesperrt" },
       "disable_hwc_load": { "name": "Warmwasserladung gesperrt" },
-      "disable_hwc_tapping": { "name": "Warmwasserentnahme gesperrt" }
+      "disable_hwc_tapping": { "name": "Warmwasserentnahme gesperrt" },
+      "omu_comp_active": { "name": "Kompressor aktiv" },
+      "omu_defrost": { "name": "Abtauung aktiv" },
+      "omu_fan_running": { "name": "Lüfter läuft" },
+      "omu_fan_error": { "name": "Lüfterfehler" },
+      "omu_cooling_active": { "name": "Kühlung aktiv" },
+      "omu_deicing_active": { "name": "Enteisung aktiv" },
+      "omu_stb_error": { "name": "STB-Fehler" },
+      "omu_source_ok": { "name": "Quelle OK" }
     }
   },
   "services": {

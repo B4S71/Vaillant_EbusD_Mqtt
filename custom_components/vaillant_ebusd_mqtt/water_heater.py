@@ -13,7 +13,6 @@ from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import (
-    CONF_HOT_WATER_NAME,
     DAYS,
     DEFAULT_HOT_WATER_NAME,
     DOMAIN,
@@ -81,9 +80,7 @@ class VaillantHotWater(VaillantEbusdEntity, WaterHeaterEntity):
         self, coordinator: VaillantEbusdCoordinator, config_entry: ConfigEntry
     ) -> None:
         super().__init__(coordinator, config_entry)
-        self._attr_name = config_entry.data.get(
-            CONF_HOT_WATER_NAME, DEFAULT_HOT_WATER_NAME
-        )
+        self._attr_name = DEFAULT_HOT_WATER_NAME
         self._attr_unique_id = f"{config_entry.entry_id}_hot_water"
 
     # ------------------------------------------------------------------

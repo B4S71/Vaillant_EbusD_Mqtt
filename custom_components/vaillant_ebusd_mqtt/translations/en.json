@@ -3,16 +3,10 @@
     "step": {
       "user": {
         "title": "Set up Vaillant eBusd MQTT",
-        "description": "Enter the MQTT topic prefixes from your ebusd configuration. Temperature topics are optional.",
+        "description": "Enter the MQTT topic prefixes from your ebusd configuration.",
         "data": {
-          "mqtt_prefix": "MQTT prefix (CcTimer / HwcTimer / PrEnergySum)",
-          "hmu_prefix": "HMU prefix (SetMode / StatusCirPump / …)",
-          "heating_name": "Heating circuit entity name",
-          "hot_water_name": "Hot water entity name",
-          "hwc_storage_temp_topic": "MQTT topic for hot water storage temperature (empty = auto: {mqtt_prefix}/HwcStorageTemp)",
-          "flow_temp_topic": "MQTT topic for flow temperature (optional)",
-          "room_temp_topic": "MQTT topic for room temperature (optional)",
-          "outdoor_temp_topic": "MQTT topic for outdoor temperature (optional)"
+          "mqtt_prefix": "MQTT prefix (ebusd/700)",
+          "hmu_prefix": "HMU prefix (ebusd/hmu)"
         }
       }
     },
@@ -27,9 +21,12 @@
       "hwc_flow_temp_desired": { "name": "Hot water flow temperature setpoint" },
       "hc_mode": { "name": "Heating circuit mode" },
       "energy_sum": { "name": "Heat pump energy total" },
-      "current_flow_temp": { "name": "Flow temperature (current)" },
-      "current_room_temp": { "name": "Room temperature (current)" },
-      "current_outdoor_temp": { "name": "Outdoor temperature (current)" }
+      "current_flow_temp": { "name": "Flow temperature" },
+      "current_room_temp": { "name": "Room temperature" },
+      "current_hwc_storage_temp": { "name": "Hot water storage temperature" },
+      "current_outdoor_temp": { "name": "Outdoor temperature" },
+      "vwz_electric_energy": { "name": "Electricity consumption total" },
+      "vwz_environment_energy": { "name": "Environmental heat total" }
     },
     "binary_sensor": {
       "hmu_on": { "name": "Heat pump active" },
@@ -38,7 +35,15 @@
       "hwc_mode_active": { "name": "Hot water heating" },
       "disable_hc": { "name": "Heating circuit disabled" },
       "disable_hwc_load": { "name": "Hot water load disabled" },
-      "disable_hwc_tapping": { "name": "Hot water tapping disabled" }
+      "disable_hwc_tapping": { "name": "Hot water tapping disabled" },
+      "omu_comp_active": { "name": "Compressor active" },
+      "omu_defrost": { "name": "Defrost active" },
+      "omu_fan_running": { "name": "Fan running" },
+      "omu_fan_error": { "name": "Fan error" },
+      "omu_cooling_active": { "name": "Cooling active" },
+      "omu_deicing_active": { "name": "De-icing active" },
+      "omu_stb_error": { "name": "STB error" },
+      "omu_source_ok": { "name": "Source OK" }
     }
   }
 }

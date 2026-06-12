@@ -14,11 +14,6 @@ from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import (
-    ATTR_CURRENT_FLOW_TEMP,
-    ATTR_CURRENT_ROOM_TEMP,
-    CONF_FLOW_TEMP_TOPIC,
-    CONF_HEATING_NAME,
-    CONF_ROOM_TEMP_TOPIC,
     DAYS,
     DEFAULT_HEATING_NAME,
     DOMAIN,
@@ -76,10 +71,8 @@ class VaillantHeatingClimate(VaillantEbusdEntity, ClimateEntity):
         self, coordinator: VaillantEbusdCoordinator, config_entry: ConfigEntry
     ) -> None:
         super().__init__(coordinator, config_entry)
-        self._attr_name = config_entry.data.get(CONF_HEATING_NAME, DEFAULT_HEATING_NAME)
+        self._attr_name = DEFAULT_HEATING_NAME
         self._attr_unique_id = f"{config_entry.entry_id}_heating"
-        self._has_room_temp = bool(config_entry.data.get(CONF_ROOM_TEMP_TOPIC, ""))
-        self._has_flow_temp = bool(config_entry.data.get(CONF_FLOW_TEMP_TOPIC, ""))
 
     # ------------------------------------------------------------------
     # State properties
@@ -99,11 +92,7 @@ class VaillantHeatingClimate(VaillantEbusdEntity, ClimateEntity):
 
     @property
     def current_temperature(self) -> float | None:
-        if self._has_room_temp:
-            return self._coordinator.current_room_temp
-        if self._has_flow_temp:
-            return self._coordinator.current_flow_temp
-        return None
+        return self._coordinator.current_room_temp or self._coordinator.current_flow_temp
 
     @property
     def extra_state_attributes(self) -> dict:

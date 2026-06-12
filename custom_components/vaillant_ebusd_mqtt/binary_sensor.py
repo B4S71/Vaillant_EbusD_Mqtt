@@ -19,6 +19,14 @@ from .const import (
     ATTR_HC_MODE_ACTIVE,
     ATTR_HMU_ON,
     ATTR_HWC_MODE_ACTIVE,
+    ATTR_OMU_COMP_ACTIVE,
+    ATTR_OMU_COOLING_ACTIVE,
+    ATTR_OMU_DEFROST,
+    ATTR_OMU_DEICING_ACTIVE,
+    ATTR_OMU_FAN_ERROR,
+    ATTR_OMU_FAN_RUNNING,
+    ATTR_OMU_SOURCE_OK,
+    ATTR_OMU_STB_ERROR,
     DOMAIN,
 )
 from .coordinator import VaillantEbusdCoordinator
@@ -31,6 +39,7 @@ class VaillantBinaryDescription(BinarySensorEntityDescription):
 
 
 BINARY_DESCRIPTIONS: tuple[VaillantBinaryDescription, ...] = (
+    # HMU status
     VaillantBinaryDescription(
         key=ATTR_HMU_ON,
         translation_key=ATTR_HMU_ON,
@@ -72,6 +81,55 @@ BINARY_DESCRIPTIONS: tuple[VaillantBinaryDescription, ...] = (
         translation_key=ATTR_DISABLE_HWC_TAPPING,
         coordinator_attr=ATTR_DISABLE_HWC_TAPPING,
         device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
+    # OMU (outdoor unit)
+    VaillantBinaryDescription(
+        key=ATTR_OMU_COMP_ACTIVE,
+        translation_key=ATTR_OMU_COMP_ACTIVE,
+        coordinator_attr=ATTR_OMU_COMP_ACTIVE,
+        device_class=BinarySensorDeviceClass.RUNNING,
+    ),
+    VaillantBinaryDescription(
+        key=ATTR_OMU_DEFROST,
+        translation_key=ATTR_OMU_DEFROST,
+        coordinator_attr=ATTR_OMU_DEFROST,
+        device_class=BinarySensorDeviceClass.RUNNING,
+    ),
+    VaillantBinaryDescription(
+        key=ATTR_OMU_FAN_RUNNING,
+        translation_key=ATTR_OMU_FAN_RUNNING,
+        coordinator_attr=ATTR_OMU_FAN_RUNNING,
+        device_class=BinarySensorDeviceClass.RUNNING,
+    ),
+    VaillantBinaryDescription(
+        key=ATTR_OMU_FAN_ERROR,
+        translation_key=ATTR_OMU_FAN_ERROR,
+        coordinator_attr=ATTR_OMU_FAN_ERROR,
+        device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
+    VaillantBinaryDescription(
+        key=ATTR_OMU_COOLING_ACTIVE,
+        translation_key=ATTR_OMU_COOLING_ACTIVE,
+        coordinator_attr=ATTR_OMU_COOLING_ACTIVE,
+        device_class=BinarySensorDeviceClass.COLD,
+    ),
+    VaillantBinaryDescription(
+        key=ATTR_OMU_DEICING_ACTIVE,
+        translation_key=ATTR_OMU_DEICING_ACTIVE,
+        coordinator_attr=ATTR_OMU_DEICING_ACTIVE,
+        device_class=BinarySensorDeviceClass.RUNNING,
+    ),
+    VaillantBinaryDescription(
+        key=ATTR_OMU_STB_ERROR,
+        translation_key=ATTR_OMU_STB_ERROR,
+        coordinator_attr=ATTR_OMU_STB_ERROR,
+        device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
+    VaillantBinaryDescription(
+        key=ATTR_OMU_SOURCE_OK,
+        translation_key=ATTR_OMU_SOURCE_OK,
+        coordinator_attr=ATTR_OMU_SOURCE_OK,
+        device_class=BinarySensorDeviceClass.CONNECTIVITY,
     ),
 )
 
