@@ -5,18 +5,11 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
 
-from .const import (
-    CONF_HMU_PREFIX,
-    CONF_MQTT_PREFIX,
-    DEFAULT_HMU_PREFIX,
-    DEFAULT_MQTT_PREFIX,
-    DOMAIN,
-)
+from .const import CONF_EBUSD_PREFIX, DEFAULT_EBUSD_PREFIX, DOMAIN
 
 STEP_USER_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_MQTT_PREFIX, default=DEFAULT_MQTT_PREFIX): str,
-        vol.Required(CONF_HMU_PREFIX, default=DEFAULT_HMU_PREFIX): str,
+        vol.Required(CONF_EBUSD_PREFIX, default=DEFAULT_EBUSD_PREFIX): str,
     }
 )
 
@@ -30,7 +23,7 @@ class VaillantEbusdConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, user_input: dict | None = None
     ) -> FlowResult:
         if user_input is not None:
-            await self.async_set_unique_id(user_input[CONF_MQTT_PREFIX])
+            await self.async_set_unique_id(user_input[CONF_EBUSD_PREFIX])
             self._abort_if_unique_id_configured()
             return self.async_create_entry(
                 title="Vaillant ebusd",

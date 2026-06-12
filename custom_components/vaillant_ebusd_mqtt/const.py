@@ -1,21 +1,11 @@
 DOMAIN = "vaillant_ebusd_mqtt"
 
-# Config entry keys
-CONF_MQTT_PREFIX = "mqtt_prefix"
-CONF_HMU_PREFIX = "hmu_prefix"
-CONF_HEATING_NAME = "heating_name"
-CONF_HOT_WATER_NAME = "hot_water_name"
+# Config entry key — single base prefix (e.g. "ebusd")
+CONF_EBUSD_PREFIX = "ebusd_prefix"
+DEFAULT_EBUSD_PREFIX = "ebusd"
 
-# Defaults
-DEFAULT_MQTT_PREFIX = "ebusd/700"
-DEFAULT_HMU_PREFIX = "ebusd/hmu"
 DEFAULT_HEATING_NAME = "Vaillant Heizung"
 DEFAULT_HOT_WATER_NAME = "Vaillant Warmwasser"
-
-# Fixed ebusd bus addresses (standard Vaillant heat pump layout)
-BROADCAST_PREFIX = "ebusd/broadcast"
-OMU_PREFIX = "ebusd/omu"
-VWZ_PREFIX = "ebusd/vwz"
 
 DAYS = [
     "Monday",

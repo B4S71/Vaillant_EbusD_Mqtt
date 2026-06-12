@@ -35,13 +35,9 @@ from .const import (
     ATTR_OMU_STB_ERROR,
     ATTR_VWZ_ELECTRIC_ENERGY,
     ATTR_VWZ_ENVIRONMENT_ENERGY,
-    BROADCAST_PREFIX,
-    CONF_HMU_PREFIX,
-    CONF_MQTT_PREFIX,
+    CONF_EBUSD_PREFIX,
     DAYS,
-    OMU_PREFIX,
     SLOT_SUFFIXES,
-    VWZ_PREFIX,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -76,8 +72,12 @@ class VaillantEbusdCoordinator:
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
         self._hass = hass
         self._config_entry = config_entry
-        self._mqtt_prefix: str = config_entry.data[CONF_MQTT_PREFIX]
-        self._hmu_prefix: str = config_entry.data[CONF_HMU_PREFIX]
+        _base: str = config_entry.data[CONF_EBUSD_PREFIX]
+        self._mqtt_prefix: str = f"{_base}/700"
+        self._hmu_prefix: str = f"{_base}/hmu"
+        self._broadcast_prefix: str = f"{_base}/broadcast"
+        self._omu_prefix: str = f"{_base}/omu"
+        self._vwz_prefix: str = f"{_base}/vwz"
 
         # Time programs: day → list[{"from": "HH:MM", "to": "HH:MM"}]
         self.cc_timer: dict[str, list[dict]] = {}
@@ -196,7 +196,7 @@ class VaillantEbusdCoordinator:
             (f"{self._hmu_prefix}/FlowTemp", ATTR_CURRENT_FLOW_TEMP),
             (f"{self._mqtt_prefix}/Z1RoomTemp", ATTR_CURRENT_ROOM_TEMP),
             (f"{self._mqtt_prefix}/HwcStorageTemp", ATTR_CURRENT_HWC_STORAGE_TEMP),
-            (f"{BROADCAST_PREFIX}/Outsidetemp", ATTR_CURRENT_OUTDOOR_TEMP),
+            (f"{self._broadcast_prefix}/Outsidetemp", ATTR_CURRENT_OUTDOOR_TEMP),
         ):
             self._unsubscribe.append(
                 await mqtt.async_subscribe(
@@ -209,14 +209,14 @@ class VaillantEbusdCoordinator:
 
         # OMU (outdoor unit) binary sensors
         for topic, attr in (
-            (f"{OMU_PREFIX}/CompActive", ATTR_OMU_COMP_ACTIVE),
-            (f"{OMU_PREFIX}/Defroster", ATTR_OMU_DEFROST),
-            (f"{OMU_PREFIX}/FanIsRunning", ATTR_OMU_FAN_RUNNING),
-            (f"{OMU_PREFIX}/FanError", ATTR_OMU_FAN_ERROR),
-            (f"{OMU_PREFIX}/CoolingActive", ATTR_OMU_COOLING_ACTIVE),
-            (f"{OMU_PREFIX}/DeicingActive", ATTR_OMU_DEICING_ACTIVE),
-            (f"{OMU_PREFIX}/STBError", ATTR_OMU_STB_ERROR),
-            (f"{OMU_PREFIX}/SourceOK", ATTR_OMU_SOURCE_OK),
+            (f"{self._omu_prefix}/CompActive", ATTR_OMU_COMP_ACTIVE),
+            (f"{self._omu_prefix}/Defroster", ATTR_OMU_DEFROST),
+            (f"{self._omu_prefix}/FanIsRunning", ATTR_OMU_FAN_RUNNING),
+            (f"{self._omu_prefix}/FanError", ATTR_OMU_FAN_ERROR),
+            (f"{self._omu_prefix}/CoolingActive", ATTR_OMU_COOLING_ACTIVE),
+            (f"{self._omu_prefix}/DeicingActive", ATTR_OMU_DEICING_ACTIVE),
+            (f"{self._omu_prefix}/STBError", ATTR_OMU_STB_ERROR),
+            (f"{self._omu_prefix}/SourceOK", ATTR_OMU_SOURCE_OK),
         ):
             self._unsubscribe.append(
                 await mqtt.async_subscribe(
@@ -229,8 +229,8 @@ class VaillantEbusdCoordinator:
 
         # VWZ (energy meter) sensors
         for topic, attr in (
-            (f"{VWZ_PREFIX}/StatElectricEnergySum", ATTR_VWZ_ELECTRIC_ENERGY),
-            (f"{VWZ_PREFIX}/StatEnvironmentEnergySum", ATTR_VWZ_ENVIRONMENT_ENERGY),
+            (f"{self._vwz_prefix}/StatElectricEnergySum", ATTR_VWZ_ELECTRIC_ENERGY),
+            (f"{self._vwz_prefix}/StatEnvironmentEnergySum", ATTR_VWZ_ENVIRONMENT_ENERGY),
         ):
             self._unsubscribe.append(
                 await mqtt.async_subscribe(

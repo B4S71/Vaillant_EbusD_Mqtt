@@ -3,10 +3,9 @@
     "step": {
       "user": {
         "title": "Set up Vaillant eBusd MQTT",
-        "description": "Enter the MQTT topic prefixes from your ebusd configuration.",
+        "description": "Enter the ebusd base topic (the part before /700, /hmu, /omu, etc.).",
         "data": {
-          "mqtt_prefix": "MQTT prefix (ebusd/700)",
-          "hmu_prefix": "HMU prefix (ebusd/hmu)"
+          "ebusd_prefix": "ebusd base topic (e.g. ebusd)"
         }
       }
     },

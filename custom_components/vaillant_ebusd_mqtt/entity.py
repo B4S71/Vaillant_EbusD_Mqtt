@@ -36,5 +36,5 @@ class VaillantEbusdEntity(Entity):
             name=self._config_entry.title,
             manufacturer="Vaillant",
             model="ebusd MQTT Bridge",
-            configuration_url=f"mqtt://{self._config_entry.data.get('mqtt_prefix', '')}",
+            configuration_url=f"mqtt://{self._config_entry.data.get('ebusd_prefix', '')}",
         )
