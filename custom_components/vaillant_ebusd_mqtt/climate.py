@@ -185,12 +185,6 @@ class VaillantHeatingClimate(ClimateEntity):
             return HVACAction.HEATING
         if self._hmu_state == "cooling":
             return HVACAction.COOLING
-        if self._hmu_state in ("ready", "heating_water", "error"):
-            return HVACAction.IDLE
-        # Fallback: flow-temp heuristic
-        cur = self._current_temp
-        if cur is not None and self._temp_day is not None:
-            return HVACAction.HEATING if cur < self._temp_day - 0.3 else HVACAction.IDLE
         return HVACAction.IDLE
 
     @property
