@@ -18,10 +18,18 @@ Replaces manual `input_datetime` helpers + automations with proper `climate` and
 
 ## Installation (HACS)
 
-1. Add this repo as a custom HACS repository (type: Integration)
-2. Install *Vaillant eBusd MQTT*
-3. Restart Home Assistant
-4. Go to **Settings → Devices & Services → Add Integration** → search for *Vaillant eBusd MQTT*
+### One-click (recommended)
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=B4S71&repository=Vaillant_EbusD_Mqtt&category=integration)
+
+### Manual via HACS
+
+1. Open HACS in Home Assistant
+2. Go to **Integrations** → click the three-dot menu → **Custom repositories**
+3. Add `https://github.com/B4S71/Vaillant_EbusD_Mqtt` with category **Integration**
+4. Search for *Vaillant eBusd MQTT* and install it
+5. Restart Home Assistant
+6. Go to **Settings → Devices & Services → Add Integration** → search for *Vaillant eBusd MQTT*
 
 ## Configuration
 
