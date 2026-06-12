@@ -15,13 +15,6 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import CONF_ENTITY_PREFIX, CONF_MQTT_PREFIX, DEFAULT_ENTITY_PREFIX, DAYS, DOMAIN, SLOT_SUFFIXES
 
-_HVAC_TO_EBUSD: dict[HVACMode, str] = {
-    HVACMode.OFF: "off",
-    HVACMode.AUTO: "auto",
-    HVACMode.HEAT: "day",
-    HVACMode.COOL: "night",
-}
-_EBUSD_TO_HVAC: dict[str, HVACMode] = {v: k for k, v in _HVAC_TO_EBUSD.items()}
 _EMPTY = "-:-"
 
 
@@ -66,14 +59,16 @@ class VaillantHeatingClimate(ClimateEntity):
         self._config_entry = config_entry
         self._attr_unique_id = f"{config_entry.entry_id}_heating"
 
-        self._hvac_mode_raw: str | None = None
+        # Z1OpMode: off / auto / day / night
+        self._heat_mode_raw: str | None = None
+        # Z1OpModeCooling: off / auto / day / night
+        self._cool_mode_raw: str | None = None
         self._hmu_state: str | None = None
-        self._temp_high: float | None = None
-        self._temp_low: float | None = None
+        self._temp_day: float | None = None      # Z1DayTemp  → target_temp_low
+        self._temp_cooling: float | None = None  # Z1CoolingTemp → target_temp_high
         self._current_temp: float | None = None
         self._humidity: float | None = None
         self._outside_temp: float | None = None
-        self._preset_raw: str | None = None
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -87,13 +82,13 @@ class VaillantHeatingClimate(ClimateEntity):
     async def async_added_to_hass(self) -> None:
         base = f"{self._mp}/700"
         for topic, handler in [
-            (f"{base}/Z1OpMode",             self._on_mode),
+            (f"{base}/Z1OpMode",             self._on_heat_mode),
+            (f"{base}/Z1OpModeCooling",      self._on_cool_mode),
             (f"{base}/Z1DayTemp",            self._on_day_temp),
-            (f"{base}/Z1NightTemp",          self._on_night_temp),
+            (f"{base}/Z1CoolingTemp",        self._on_cooling_temp),
             (f"{base}/Z1RoomTemp",           self._on_current_temp),
             (f"{base}/RoomHumidity",         self._on_humidity),
             (f"{base}/DisplayedOutsideTemp", self._on_outside_temp),
-            (f"{base}/Z1SfMode",             self._on_preset),
             (f"{self._mp}/hmu/State",        self._on_hmu_state),
         ]:
             self.async_on_remove(
@@ -114,24 +109,31 @@ class VaillantHeatingClimate(ClimateEntity):
             return None
 
     @callback
-    def _on_mode(self, msg) -> None:
+    def _on_heat_mode(self, msg) -> None:
         v = self._val(msg)
         if v is not None:
-            self._hvac_mode_raw = str(v)
+            self._heat_mode_raw = str(v)
+        self.async_write_ha_state()
+
+    @callback
+    def _on_cool_mode(self, msg) -> None:
+        v = self._val(msg)
+        if v is not None:
+            self._cool_mode_raw = str(v)
         self.async_write_ha_state()
 
     @callback
     def _on_day_temp(self, msg) -> None:
         v = self._float_val(msg)
         if v is not None:
-            self._temp_high = v
+            self._temp_day = v
         self.async_write_ha_state()
 
     @callback
-    def _on_night_temp(self, msg) -> None:
+    def _on_cooling_temp(self, msg) -> None:
         v = self._float_val(msg)
         if v is not None:
-            self._temp_low = v
+            self._temp_cooling = v
         self.async_write_ha_state()
 
     @callback
@@ -156,13 +158,6 @@ class VaillantHeatingClimate(ClimateEntity):
         self.async_write_ha_state()
 
     @callback
-    def _on_preset(self, msg) -> None:
-        v = self._val(msg)
-        if v is not None:
-            self._preset_raw = str(v)
-        self.async_write_ha_state()
-
-    @callback
     def _on_hmu_state(self, msg) -> None:
         try:
             self._hmu_state = str(json.loads(msg.payload)["state"])
@@ -172,27 +167,30 @@ class VaillantHeatingClimate(ClimateEntity):
 
     @property
     def hvac_mode(self) -> HVACMode:
-        return _EBUSD_TO_HVAC.get(self._hvac_mode_raw or "", HVACMode.OFF)
+        h = self._heat_mode_raw
+        c = self._cool_mode_raw
+        if h in (None, "off") and c in (None, "off"):
+            return HVACMode.OFF
+        if c in (None, "off"):
+            return HVACMode.HEAT
+        if h in (None, "off"):
+            return HVACMode.COOL
+        return HVACMode.AUTO
 
     @property
     def hvac_action(self) -> HVACAction:
-        if self._hvac_mode_raw in (None, "off"):
+        if self.hvac_mode == HVACMode.OFF:
             return HVACAction.OFF
-        # Primary: real HMU state from ebusd/hmu/State
         if self._hmu_state == "heating":
             return HVACAction.HEATING
         if self._hmu_state == "cooling":
             return HVACAction.COOLING
         if self._hmu_state in ("ready", "heating_water", "error"):
             return HVACAction.IDLE
-        # Fallback: derive from current vs target temperature
+        # Fallback: flow-temp heuristic
         cur = self._current_temp
-        if self._hvac_mode_raw == "night":
-            if cur is not None and self._temp_low is not None:
-                return HVACAction.HEATING if cur < self._temp_low - 0.3 else HVACAction.IDLE
-        else:
-            if cur is not None and self._temp_high is not None:
-                return HVACAction.HEATING if cur < self._temp_high - 0.3 else HVACAction.IDLE
+        if cur is not None and self._temp_day is not None:
+            return HVACAction.HEATING if cur < self._temp_day - 0.3 else HVACAction.IDLE
         return HVACAction.IDLE
 
     @property
@@ -201,15 +199,20 @@ class VaillantHeatingClimate(ClimateEntity):
 
     @property
     def target_temperature_high(self) -> float | None:
-        return self._temp_high
+        return self._temp_cooling  # Z1CoolingTemp
 
     @property
     def target_temperature_low(self) -> float | None:
-        return self._temp_low
+        return self._temp_day  # Z1DayTemp
 
     @property
     def preset_mode(self) -> str:
-        return self._preset_raw if self._preset_raw in (self._attr_preset_modes or []) else "none"
+        # Presets are derived from Z1OpMode, same as the MQTT discovery entity
+        if self._heat_mode_raw == "day":
+            return "comfort"
+        if self._heat_mode_raw == "night":
+            return "sleep"
+        return "none"
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -234,31 +237,39 @@ class VaillantHeatingClimate(ClimateEntity):
         return attrs
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
+        heat_val, cool_val = {
+            HVACMode.OFF:  ("off",  "off"),
+            HVACMode.HEAT: ("day",  "off"),
+            HVACMode.COOL: ("off",  "day"),
+            HVACMode.AUTO: ("auto", "auto"),
+        }.get(hvac_mode, ("auto", "auto"))
         await mqtt.async_publish(
-            self.hass,
-            f"{self._mp}/700/Z1OpMode/set",
-            json.dumps({"value": _HVAC_TO_EBUSD.get(hvac_mode, "auto")}),
+            self.hass, f"{self._mp}/700/Z1OpMode/set",
+            json.dumps({"value": heat_val}),
+        )
+        await mqtt.async_publish(
+            self.hass, f"{self._mp}/700/Z1OpModeCooling/set",
+            json.dumps({"value": cool_val}),
         )
 
     async def async_set_temperature(self, **kwargs) -> None:
         if (high := kwargs.get("target_temp_high")) is not None:
             await mqtt.async_publish(
-                self.hass,
-                f"{self._mp}/700/Z1DayTemp/set",
+                self.hass, f"{self._mp}/700/Z1CoolingTemp/set",
                 json.dumps({"value": float(high)}),
             )
         if (low := kwargs.get("target_temp_low")) is not None:
             await mqtt.async_publish(
-                self.hass,
-                f"{self._mp}/700/Z1NightTemp/set",
+                self.hass, f"{self._mp}/700/Z1DayTemp/set",
                 json.dumps({"value": float(low)}),
             )
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
+        # Presets map to Z1OpMode: comfort=day, sleep=night
+        val = {"comfort": "day", "sleep": "night"}.get(preset_mode, "auto")
         await mqtt.async_publish(
-            self.hass,
-            f"{self._mp}/700/Z1SfMode/set",
-            json.dumps({"value": preset_mode}),
+            self.hass, f"{self._mp}/700/Z1OpMode/set",
+            json.dumps({"value": val}),
         )
 
     async def async_set_time_program(self, day: str, slots: list[dict]) -> None:
