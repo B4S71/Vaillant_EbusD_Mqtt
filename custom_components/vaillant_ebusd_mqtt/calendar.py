@@ -47,7 +47,7 @@ async def async_setup_entry(
         [
             VaillantTimerCalendar(
                 coordinator, DEVICE_HEATING, "heating_schedule",
-                "Heating schedule", T_HEATING_TIMER, "Comfort",
+                "Heating schedule", T_HEATING_TIMER, "Heating",
             ),
             VaillantTimerCalendar(
                 coordinator, DEVICE_HEATING, "cooling_schedule",
