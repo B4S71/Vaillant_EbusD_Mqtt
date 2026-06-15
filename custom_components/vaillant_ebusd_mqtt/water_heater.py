@@ -17,7 +17,6 @@ from .const import (
     DAYS,
     DEVICE_HOT_WATER,
     DOMAIN,
-    HOT_WATER_MODES,
     HWC_MAX_TEMP,
     HWC_MIN_TEMP,
     T_HWC_OPMODE,
@@ -27,6 +26,12 @@ from .const import (
 )
 from .coordinator import VaillantCoordinator, VaillantEntity
 from .timeprog import payload_from_slots, slots_from_day
+
+# The water_heater card only has icons for HA's built-in operation modes, so the
+# Vaillant HwcOpMode (off/auto/day) is mapped onto standard modes here. The native
+# off/auto/day wording is still available on the separate "Hot water mode" select.
+_EBUSD_TO_OP = {"off": "off", "auto": "eco", "day": "performance", "night": "eco"}
+_OP_TO_EBUSD = {"off": "off", "eco": "auto", "performance": "day"}
 
 
 async def async_setup_entry(
@@ -59,7 +64,7 @@ async def async_setup_entry(
 class VaillantHotWater(VaillantEntity, WaterHeaterEntity):
     _attr_name = None
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
-    _attr_operation_list = HOT_WATER_MODES
+    _attr_operation_list = list(_OP_TO_EBUSD)
     _attr_supported_features = (
         WaterHeaterEntityFeature.TARGET_TEMPERATURE
         | WaterHeaterEntityFeature.OPERATION_MODE
@@ -74,7 +79,7 @@ class VaillantHotWater(VaillantEntity, WaterHeaterEntity):
     @property
     def current_operation(self) -> str | None:
         mode = self.coordinator.get_str(T_HWC_OPMODE)
-        return mode if mode in HOT_WATER_MODES else None
+        return _EBUSD_TO_OP.get(mode) if mode else None
 
     @property
     def current_temperature(self) -> float | None:
@@ -100,7 +105,9 @@ class VaillantHotWater(VaillantEntity, WaterHeaterEntity):
         }
 
     async def async_set_operation_mode(self, operation_mode: str) -> None:
-        await self.coordinator.async_publish_scalar(T_HWC_OPMODE, operation_mode)
+        await self.coordinator.async_publish_scalar(
+            T_HWC_OPMODE, _OP_TO_EBUSD.get(operation_mode, "auto")
+        )
 
     async def async_set_temperature(self, **kwargs) -> None:
         if (temp := kwargs.get("temperature")) is not None:
