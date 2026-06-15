@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Set up Vaillant eBusd MQTT",
-        "description": "Enter the entity prefix used by your ebusd_vaillant integration and the MQTT base topic used by ebusd.",
+        "description": "Enter the entity prefix and the MQTT base topic used by ebusd.",
         "data": {
           "entity_prefix": "Entity prefix (e.g. heating)",
           "mqtt_prefix": "MQTT base topic (e.g. ebusd)"
@@ -12,6 +12,28 @@
     },
     "abort": {
       "already_configured": "This ebusd instance is already configured."
+    }
+  },
+  "services": {
+    "set_heating_time_program": {
+      "name": "Set heating time program",
+      "description": "Sets the weekly heating schedule for one day (ebusd Z1Timer).",
+      "fields": {
+        "day": { "name": "Weekday", "description": "English day name (Monday … Sunday)" },
+        "slots": { "name": "Time windows", "description": "Up to 3 entries: [{from: HH:MM, to: HH:MM}]" }
+      }
+    },
+    "set_hot_water_time_program": {
+      "name": "Set hot water time program",
+      "description": "Sets the weekly hot water schedule for one day (ebusd HwcTimer).",
+      "fields": {
+        "day": { "name": "Weekday", "description": "English day name (Monday … Sunday)" },
+        "slots": { "name": "Time windows", "description": "Up to 3 entries: [{from: HH:MM, to: HH:MM}]" }
+      }
+    },
+    "trigger_legionella_protection": {
+      "name": "Trigger legionella protection",
+      "description": "Raises the hot water setpoint to the maximum once for a legionella protection cycle."
     }
   }
 }
