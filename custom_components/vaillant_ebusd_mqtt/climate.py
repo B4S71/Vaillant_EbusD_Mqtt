@@ -21,6 +21,8 @@ from .const import (
     DEVICE_HEATING,
     DOMAIN,
     HEATING_MIN_TEMP,
+    T_HC1_FLOW_TEMP,
+    T_HC1_PUMP_STATUS,
     T_HEATING_TIMER,
     T_OUTSIDE_TEMP,
     T_ROOM_HUMIDITY,
@@ -92,10 +94,41 @@ class VaillantHeatingClimate(VaillantEntity, ClimateEntity):
     def hvac_action(self) -> HVACAction:
         if self.hvac_mode == HVACMode.OFF:
             return HVACAction.OFF
-        if self.coordinator.hmu_state == "heating":
+        # hmu/State's enum mixes case: "ready"/"error"/"heating_water" are
+        # lowercase but "Heating"/"Cooling" are capitalized.
+        state = (self.coordinator.hmu_state or "").lower()
+        if state == "heating":
             return HVACAction.HEATING
-        if self.coordinator.hmu_state == "cooling":
+        if state == "cooling":
             return HVACAction.COOLING
+        if state in ("ready", "heating_water", "error"):
+            return HVACAction.IDLE
+        return self._hvac_action_fallback()
+
+    def _hvac_action_fallback(self) -> HVACAction:
+        """Heuristic used while hmu/State hasn't reported a usable value yet.
+
+        Mirrors a hand-built HA automation the user already relied on: pump
+        duty decides idle-vs-running, the active op mode decides heat-vs-cool
+        when only one circuit is on, and flow-vs-room temperature breaks the
+        tie when both (or neither) op mode is conclusive.
+        """
+        pump = self.coordinator.get_float(T_HC1_PUMP_STATUS)
+        if not pump:
+            return HVACAction.IDLE
+        heat = self.coordinator.get_str(T_Z1_OPMODE)
+        cool = self.coordinator.get_str(T_Z1_OPMODE_COOLING)
+        if cool not in (None, "off") and heat in (None, "off"):
+            return HVACAction.COOLING
+        if heat not in (None, "off") and cool in (None, "off"):
+            return HVACAction.HEATING
+        flow = self.coordinator.get_float(T_HC1_FLOW_TEMP)
+        room = self.coordinator.get_float(T_Z1_ROOM_TEMP)
+        if flow is not None and room is not None:
+            if flow < room - 0.5:
+                return HVACAction.COOLING
+            if flow > room + 0.5:
+                return HVACAction.HEATING
         return HVACAction.IDLE
 
     @property
@@ -112,6 +145,8 @@ class VaillantHeatingClimate(VaillantEntity, ClimateEntity):
 
     @property
     def preset_mode(self) -> str:
+        if self.hvac_mode == HVACMode.COOL:
+            return "comfort" if self.coordinator.get_str(T_Z1_OPMODE_COOLING) == "day" else "none"
         mode = self.coordinator.get_str(T_Z1_OPMODE)
         if mode == "day":
             return "comfort"
@@ -142,8 +177,8 @@ class VaillantHeatingClimate(VaillantEntity, ClimateEntity):
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         heat_val, cool_val = {
             HVACMode.OFF: ("off", "off"),
-            HVACMode.HEAT: ("day", "off"),
-            HVACMode.COOL: ("off", "day"),
+            HVACMode.HEAT: ("auto", "off"),
+            HVACMode.COOL: ("off", "auto"),
             HVACMode.AUTO: ("auto", "auto"),
         }.get(hvac_mode, ("auto", "auto"))
         await self.coordinator.async_publish_scalar(T_Z1_OPMODE, heat_val)
@@ -156,6 +191,10 @@ class VaillantHeatingClimate(VaillantEntity, ClimateEntity):
             await self.coordinator.async_publish_scalar(T_Z1_DAY_TEMP, float(low))
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
+        if self.hvac_mode == HVACMode.COOL:
+            val = "day" if preset_mode == "comfort" else "auto"
+            await self.coordinator.async_publish_scalar(T_Z1_OPMODE_COOLING, val)
+            return
         val = {"comfort": "day", "sleep": "night"}.get(preset_mode, "auto")
         await self.coordinator.async_publish_scalar(T_Z1_OPMODE, val)
 

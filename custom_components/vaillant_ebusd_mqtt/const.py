@@ -41,6 +41,10 @@ T_Z1_ROOM_TEMP = "Z1RoomTemp"
 T_ROOM_HUMIDITY = "RoomHumidity"
 T_OUTSIDE_TEMP = "DisplayedOutsideTemp"
 T_HWC_STORAGE_TEMP = "HwcStorageTemp"
+# heating-circuit pump duty and flow temp; used as an hvac_action fallback
+# heuristic when hmu/State hasn't reported a usable heating/cooling value yet
+T_HC1_PUMP_STATUS = "Hc1PumpStatus"
+T_HC1_FLOW_TEMP = "Hc1FlowTemp"
 
 SCALAR_TOPICS = [
     T_Z1_OPMODE,
@@ -54,6 +58,8 @@ SCALAR_TOPICS = [
     T_ROOM_HUMIDITY,
     T_OUTSIDE_TEMP,
     T_HWC_STORAGE_TEMP,
+    T_HC1_PUMP_STATUS,
+    T_HC1_FLOW_TEMP,
 ]
 
 # --- Timer (weekly planner) topics -----------------------------------------
